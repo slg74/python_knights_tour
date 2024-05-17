@@ -2,5 +2,8 @@
 Solved knights tour in Python. 
 
 ![knights_tour](knights_tour.png)  
- 
+
+Unit test
+
+![knights_tour_test](knights_tour_test.png)  
  
