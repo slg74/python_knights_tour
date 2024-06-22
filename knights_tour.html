@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Knight's Tour</title>
+    <style>
+        #board {
+            border: 1px solid black;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 400px;
+            height: 400px;
+        }
+
+        .cell {
+            border: 1px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="board"></div>
+    <script>
+        const board = document.getElementById('board');
+        const size = 8;
+        const moves = [
+            [-2, -1], [-1, -2], [1, -2], [2, -1],
+            [2, 1], [1, 2], [-1, 2], [-2, 1]
+        ];
+
+        function isValidMove(x, y) {
+            return x >= 0 && x < size && y >= 0 && y < size;
+        }
+
+        function knightsTour() {
+            const visited = new Array(size).fill(0).map(() => new Array(size).fill(false));
+            const path = new Array(size * size).fill(-1);
+
+            function solveKnightsTour(x, y, step) {
+                if (step === size * size) {
+                    return true;
+                }
+
+                for (let [dx, dy] of moves) {
+                    const newX = x + dx;
+                    const newY = y + dy;
+
+                    if (isValidMove(newX, newY) && !visited[newX][newY]) {
+                        visited[newX][newY] = true;
+                        path[step] = [newX, newY];
+
+                        if (solveKnightsTour(newX, newY, step + 1)) {
+                            return true;
+                        }
+
+                        visited[newX][newY] = false;
+                        path[step] = -1;
+                    }
+                }
+
+                return false;
+            }
+
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    visited[i][j] = true;
+                    path[0] = [i, j];
+
+                    if (solveKnightsTour(i, j, 1)) {
+                        renderBoard(path);
+                        return;
+                    }
+
+                    visited[i][j] = false;
+                    path[0] = -1;
+                }
+            }
+        }
+
+        function renderBoard(path) {
+            board.innerHTML = '';
+
+            for (let i = 0; i < size * size; i++) {
+                const [x, y] = path[i];
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = i + 1;
+                cell.style.gridColumn = y + 1;
+                cell.style.gridRow = x + 1;
+                board.appendChild(cell);
+            }
+        }
+
+        knightsTour();
+    </script>
+</body>
+</html>
