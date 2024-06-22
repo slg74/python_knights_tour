@@ -3,98 +3,95 @@
 <head>
     <title>Knight's Tour</title>
     <style>
-        #board {
-            border: 1px solid black;
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-template-rows: repeat(8, 1fr);
-            width: 400px;
-            height: 400px;
+        table {
+            border-collapse: collapse;
         }
-
-        .cell {
-            border: 1px solid black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-weight: bold;
             font-size: 20px;
+        }
+        .light {
+            background-color: #f0d9b5;
+        }
+        .dark {
+            background-color: #b58863;
         }
     </style>
 </head>
-<body>
-    <div id="board"></div>
+<body onload="main()">
+    <h1>Knight's Tour</h1>
+    <table id="chessboard"></table>
+
     <script>
-        const board = document.getElementById('board');
-        const size = 8;
-        const moves = [
-            [-2, -1], [-1, -2], [1, -2], [2, -1],
-            [2, 1], [1, 2], [-1, 2], [-2, 1]
-        ];
+        const N = 8; // 8x8 chessboard
 
-        function isValidMove(x, y) {
-            return x >= 0 && x < size && y >= 0 && y < size;
-        }
+        function walkBoard(x, y, m, board, xmoves, ymoves) {
+            if (m === N * N) {
+                printBoard(board);
+                return true;
+            }
 
-        function knightsTour() {
-            const visited = new Array(size).fill(0).map(() => new Array(size).fill(false));
-            const path = new Array(size * size).fill(-1);
-
-            function solveKnightsTour(x, y, step) {
-                if (step === size * size) {
-                    return true;
-                }
-
-                for (let [dx, dy] of moves) {
-                    const newX = x + dx;
-                    const newY = y + dy;
-
-                    if (isValidMove(newX, newY) && !visited[newX][newY]) {
-                        visited[newX][newY] = true;
-                        path[step] = [newX, newY];
-
-                        if (solveKnightsTour(newX, newY, step + 1)) {
-                            return true;
-                        }
-
-                        visited[newX][newY] = false;
-                        path[step] = -1;
+            for (let i = 0; i < N; i++) {
+                const nextX = x + xmoves[i];
+                const nextY = y + ymoves[i];
+                if (canMove(nextX, nextY, board)) {
+                    board[nextX][nextY] = m;
+                    if (walkBoard(nextX, nextY, m + 1, board, xmoves, ymoves)) {
+                        return true;
+                    } else {
+                        board[nextX][nextY] = -1;
                     }
                 }
-
-                return false;
             }
 
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size; j++) {
-                    visited[i][j] = true;
-                    path[0] = [i, j];
+            return false;
+        }
 
-                    if (solveKnightsTour(i, j, 1)) {
-                        renderBoard(path);
-                        return;
+        function canMove(x, y, board) {
+            return x >= 0 && x < N && y >= 0 && y < N && board[x][y] === -1;
+        }
+
+        function printBoard(board) {
+            const chessboard = document.getElementById("chessboard");
+            const tableBody = document.createElement("tbody");
+
+            for (let i = 0; i < N; i++) {
+                const tr = document.createElement("tr");
+
+                for (let j = 0; j < N; j++) {
+                    const td = document.createElement("td");
+                    td.textContent = board[i][j];
+
+                    // Add the "light" or "dark" class based on the row and column indices
+                    if ((i + j) % 2 === 0) {
+                        td.classList.add("light");
+                    } else {
+                        td.classList.add("dark");
                     }
 
-                    visited[i][j] = false;
-                    path[0] = -1;
+                    tr.appendChild(td);
                 }
+
+                tableBody.appendChild(tr);
             }
+
+            chessboard.appendChild(tableBody);
         }
 
-        function renderBoard(path) {
-            board.innerHTML = '';
+        function main() {
+            const board = Array.from({ length: N }, () => Array.from({ length: N }, () => -1));
+            const xmoves = [2, 1, -1, -2, -2, -1, 1, 2];
+            const ymoves = [1, 2, 2, 1, -1, -2, -2, -1];
 
-            for (let i = 0; i < size * size; i++) {
-                const [x, y] = path[i];
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.textContent = i + 1;
-                cell.style.gridColumn = y + 1;
-                cell.style.gridRow = x + 1;
-                board.appendChild(cell);
+            board[0][0] = 0;
+
+            if (!walkBoard(0, 0, 1, board, xmoves, ymoves)) {
+                console.log("No solution.");
             }
         }
-
-        knightsTour();
     </script>
 </body>
 </html>
